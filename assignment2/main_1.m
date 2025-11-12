@@ -1,3 +1,6 @@
+% TODO: small star in the center of the squares
+% TODO: change windows size for task 4 (dark car)
+
 close all;
 clear, clc;
 

@@ -1,3 +1,5 @@
+% TODO: show corners on R-score map
+
 close all;
 clear, clc;
 
