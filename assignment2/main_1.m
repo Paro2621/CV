@@ -1,6 +1,3 @@
-% TODO: small star in the center of the squares
-% TODO: change windows size for task 4 (dark car)
-
 close all;
 clear, clc;
 
@@ -13,41 +10,37 @@ images = { 'ur_c_s_03a_01_L_0376.png', ...
            'ur_c_s_03a_01_L_0379.png', ...
            'ur_c_s_03a_01_L_0380.png', ...
            'ur_c_s_03a_01_L_0381.png' };
-%% first part
-y_min = 350;
-y_max = 440;
-
-x_min = 670;
-x_max = 790;
 
 
 img = im2gray(imread(images{1}));
-turning_car = img(y_min:y_max, x_min:x_max, :);
+red_car = img(360:420,690:770);
+turning_car = img(370:412,555:645);
+big_window=img(320:462,495:705);   % bigger window black car - slower
+small_window=img(387:395,595:605); %smaller window black car - we do not find the car anymore
 
-figure, imagesc(turning_car), axis equal, colormap gray
 
-c = normxcorr2(turning_car,img);
+TemplateMatching(red_car,images,"Red car")
+TemplateMatching(turning_car,images," Black car");
+TemplateMatching(big_window,images,"Big window black car");
+TemplateMatching(small_window,images," Small window black car");
 
-maxval = max(max(c));
 
-mask = c > 0.99*maxval;
+function TemplateMatching(window_size,images,Templatename)
 
-% figure, imagesc(mask), axis equal, colormap gray
-stats = regionprops("table", mask, "Centroid");
-centers = stats.Centroid(1,:); % first object's centroid (x, y)
-
-l = x_max - x_min;
-h = y_max - y_min;
-
-% Adjust centroid to top-left corner for rectangle placement
-x_corner = centers(1) - l;
-y_corner = centers(2) - h;
+figure, imagesc(window_size), axis equal, colormap gray
+[h, l] = size(window_size);
+fprintf('Window size: %d (height) x %d (lenght)\n', h, l);
 
 figure
 for i = 1:numel(images)
     img = im2gray(imread(images{i}));
 
-    c = normxcorr2(turning_car,img);
+    tic
+    c = normxcorr2(window_size, img);
+    elapsed_time = toc;
+
+
+    fprintf('Image #%d, Template "%s: time = %.4f secondi\n', i,Templatename, elapsed_time);
 
     maxval = max(max(c));
     mask = c > 0.99*maxval;
@@ -55,9 +48,7 @@ for i = 1:numel(images)
     % figure, imagesc(mask), axis equal, colormap gray
     stats = regionprops("table", mask, "Centroid");
     centers = stats.Centroid(1,:); % first object's centroid (x, y)
-    
-    l = x_max - x_min;
-    h = y_max - y_min;
+   
     
     % Adjust centroid to top-left corner for rectangle placement
     x_corner = centers(1) - l;
@@ -66,60 +57,10 @@ for i = 1:numel(images)
     subplot(2,3,i)
     imagesc(img), axis equal, hold on, colormap gray
     rectangle('Position', [x_corner, y_corner, l, h], 'EdgeColor', 'r')
+    plot(centers(1)-l/2, centers(2)-h/2, '*r');
     title(images{i})
 end
 
-%% second part
-y_min = 370;
-y_max = 412;
-
-x_min = 550;
-x_max = 645;
-
-img = im2gray(imread(images{1}));
-turning_car = img(y_min:y_max, x_min:x_max, :);
-
-figure, imagesc(turning_car), axis equal, colormap gray
-
-c = normxcorr2(turning_car,img);
-
-maxval = max(max(c));
-
-mask = c > 0.99*maxval;
-
-% figure, imagesc(mask), axis equal, colormap gray
-stats = regionprops("table", mask, "Centroid");
-centers = stats.Centroid(1,:); % first object's centroid (x, y)
-
-l = x_max - x_min;
-h = y_max - y_min;
-
-% Adjust centroid to top-left corner for rectangle placement
-x_corner = centers(1) - l;
-y_corner = centers(2) - h;
-
-figure
-for i = 1:numel(images)
-    img = im2gray(imread(images{i}));
-
-    c = normxcorr2(turning_car,img);
-
-    maxval = max(max(c));
-    mask = c > 0.99*maxval;
-    
-    % figure, imagesc(mask), axis equal, colormap gray
-    stats = regionprops("table", mask, "Centroid");
-    centers = stats.Centroid(1,:); % first object's centroid (x, y)
-    
-    l = x_max - x_min;
-    h = y_max - y_min;
-    
-    % Adjust centroid to top-left corner for rectangle placement
-    x_corner = centers(1) - l;
-    y_corner = centers(2) - h;
-    
-    subplot(2,3,i)
-    imagesc(img), axis equal, hold on, colormap gray
-    rectangle('Position', [x_corner, y_corner, l, h], 'EdgeColor', 'r')
-    title(images{i})
 end
+
+
