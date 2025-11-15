@@ -90,7 +90,7 @@ imagesc(corner_reg),colormap gray, title('Corner region'), axis square
 
 %in heat map
 figure,
-imagesc(R_map),colormap jet,colorbar, title('R map'), axis square
+imagesc(R_map),colormap jet, title('R map'), axis square
 hold on
 [rows, cols] = find(corner_reg);
 plot(cols, rows, 'r+')

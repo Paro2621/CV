@@ -1,6 +1,6 @@
-close all;
-clear, clc;
-
+% close all;
+% clear, clc;
+set(0, 'DefaultFigureWindowStyle', 'docked'); 
 addpath("testimages/")
 
 % second part
@@ -46,18 +46,19 @@ for i = 1:numel(images)
     mask = c > 0.99*maxval;
     
     % figure, imagesc(mask), axis equal, colormap gray
-    stats = regionprops("table", mask, "Centroid");
-    centers = stats.Centroid(1,:); % first object's centroid (x, y)
+    prop=regionprops(mask, 'Area','Centroid','BoundingBox');%needs logical matrix
+
+    col1 = arrayfun(@(prop) prop.Area(1), prop);
+    [maxVal, idx] = max(col1);
    
-    
     % Adjust centroid to top-left corner for rectangle placement
-    x_corner = centers(1) - l;
-    y_corner = centers(2) - h;
+    x_corner = prop(idx).Centroid(1) - l;
+    y_corner = prop(idx).Centroid(2) - h;
     
     subplot(2,3,i)
     imagesc(img), axis equal, hold on, colormap gray
     rectangle('Position', [x_corner, y_corner, l, h], 'EdgeColor', 'r')
-    plot(centers(1)-l/2, centers(2)-h/2, '*r');
+    plot(prop(idx).Centroid(1)-l/2, prop(idx).Centroid(2)-h/2, '*r');
     title(images{i})
 end
 
