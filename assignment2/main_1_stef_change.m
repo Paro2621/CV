@@ -1,6 +1,6 @@
-% close all;
-% clear, clc;
-set(0, 'DefaultFigureWindowStyle', 'docked'); 
+close all;
+clear, clc;
+% set(0, 'DefaultFigureWindowStyle', 'docked'); 
 addpath("testimages/")
 
 % second part
@@ -13,18 +13,16 @@ images = { 'ur_c_s_03a_01_L_0376.png', ...
 
 
 img = im2gray(imread(images{1}));
-red_car =       img(360:420,690:770);
-turning_car =   img(370:412,555:645);
-big_window =    img(320:462,495:705);   
-    % bigger window black car - slower
-small_window =  img(387:395,595:605);   
-    % smaller window black car - we do not find the car anymore
+red_car = img(360:420,690:770); %window of car
+turning_car = img(370:412,555:645); %window of blue car
+big_window=img(320:462,495:705);   % bigger window black car - slower
+small_window=img(387:395,595:605); %smaller window black car - we do not find the car anymore
 
 
-TemplateMatching(red_car,       images, "Red car")
-TemplateMatching(turning_car,   images, " Black car");
-TemplateMatching(big_window,    images, "Big window black car");
-TemplateMatching(small_window,  images, " Small window black car");
+TemplateMatching(red_car,images,"Red car")
+TemplateMatching(turning_car,images," Black car");
+TemplateMatching(big_window,images,"Big window black car");
+TemplateMatching(small_window,images," Small window black car");
 
 
 function TemplateMatching(window_size,images,Templatename)
@@ -44,15 +42,22 @@ for i = 1:numel(images)
 
     fprintf('Image #%d, Template "%s: time = %.4f secondi\n', i,Templatename, elapsed_time);
 
-    maxval = max(max(c));
-    mask = c > 0.99*maxval;
+    maxval = max(max(c)); %double max as its a 2D 
+    mask = c > 0.99*maxval; %threshold to 99% of maxval 
     
     % figure, imagesc(mask), axis equal, colormap gray
+    %stats = regionprops("table", mask, "Centroid");
+    %centers = stats.Centroid(1,:); % first object's centroid (x, y) the
+    %assumption only 1 will survive
+
+    %this assumes that values or "blods" founds in mask are more than one
+    %value may be unnecassary but its more concrete...what you think?
     prop=regionprops(mask, 'Area','Centroid','BoundingBox');%needs logical matrix
 
     col1 = arrayfun(@(prop) prop.Area(1), prop);
     [maxVal, idx] = max(col1);
    
+    
     % Adjust centroid to top-left corner for rectangle placement
     x_corner = prop(idx).Centroid(1) - l;
     y_corner = prop(idx).Centroid(2) - h;

@@ -1,7 +1,7 @@
 % TODO: show corners on R-score map
 
-close all;
-clear, clc;
+% close all;
+% clear, clc;
 
 addpath("testimages/")
 
@@ -93,6 +93,21 @@ imagesc(g),colormap gray,title('Gaussian'), axis square
 figure,
 imagesc(R_map),colormap gray,title('R map'), axis square
 
+%corner regions on R score map, indicate where all potential corners are found
+%on the scoremap. Both show the same thing just viewed differently. Heat
+%map was used in the example
+
+%shown in "blods"
+figure,
+imagesc(corner_reg),colormap gray, title('Corner region'), axis square
+
+%in heat map
+figure,
+imagesc(R_map),colormap jet, title('R map'), axis square
+hold on
+[rows, cols] = find(corner_reg);
+plot(cols, rows, 'r+')
+
 % spotted corners
 figure,
 imagesc(I),colormap gray,title('corner regions spotted')
@@ -106,4 +121,10 @@ stats = regionprops("table",corner_reg_star,"Centroid");
 
 centers = stats.Centroid;
 
+plot(centers(:, 1), centers(:, 2), '*r')
+
+%corner regions on 0.3*R score map, indicate the highest potential corners
+figure,
+imagesc(R_map),colormap gray, title('R map'), axis square
+hold on
 plot(centers(:, 1), centers(:, 2), '*r')
