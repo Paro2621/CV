@@ -13,16 +13,18 @@ images = { 'ur_c_s_03a_01_L_0376.png', ...
 
 
 img = im2gray(imread(images{1}));
-red_car = img(360:420,690:770);
-turning_car = img(370:412,555:645);
-big_window=img(320:462,495:705);   % bigger window black car - slower
-small_window=img(387:395,595:605); %smaller window black car - we do not find the car anymore
+red_car =       img(360:420,690:770);
+turning_car =   img(370:412,555:645);
+big_window =    img(320:462,495:705);   
+    % bigger window black car - slower
+small_window =  img(387:395,595:605);   
+    % smaller window black car - we do not find the car anymore
 
 
-TemplateMatching(red_car,images,"Red car")
-TemplateMatching(turning_car,images," Black car");
-TemplateMatching(big_window,images,"Big window black car");
-TemplateMatching(small_window,images," Small window black car");
+TemplateMatching(red_car,       images, "Red car")
+TemplateMatching(turning_car,   images, " Black car");
+TemplateMatching(big_window,    images, "Big window black car");
+TemplateMatching(small_window,  images, " Small window black car");
 
 
 function TemplateMatching(window_size,images,Templatename)

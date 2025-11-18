@@ -1,0 +1,166 @@
+%% Part 1: estimation of the fundamental matrix with manually selected correspondences
+clear, clc;
+close all;
+
+addpath('include')
+
+% Load images
+img1 = imread('media/Rubik1.pgm');
+img2 = imread('media/Rubik2.pgm');
+
+% Load points
+P1orig = load('media/Rubik1.points'); % [13r, 2c]
+P2orig = load('media/Rubik2.points');
+
+%P1orig = P1orig(1:10,:);
+%P2orig = P2orig(1:10,:);
+
+n = size(P1orig,1);
+
+% Add the third component to work in homogeneous coordinates
+P1 = [P1orig'; ones(1,n)];
+P2 = [P2orig'; ones(1,n)];
+
+
+% Estimate the fundamental matrix
+function F = EightPointsAlgorithm(P1, P2)
+    n = size(P1,2);
+
+    m2 = [1 0 0; 1 0 0; 1 0 0; 0 1 0; 0 1 0; 0 1 0; 0 0 1; 0 0 1; 0 0 1];
+    m1 = [1 0 0; 0 1 0; 0 0 1; 1 0 0; 0 1 0; 0 0 1; 1 0 0; 0 1 0; 0 0 1];
+
+    A = zeros(n,9);
+
+    for i = 1:n        
+        A(i, :) = (m2*P2(:, i))' .* (m1*P1(:, i))' ;
+    end
+
+    [~, ~, V] = svd(A);
+    
+    V_end = V(:, end);
+    
+    F = [V_end(1:3)'; V_end(4:6)'; V_end(7:9)'];
+    
+    % since rank(F) == 3 we anforce rank 2
+    [U1, D1, V1] = svd(F);   
+    D1(3, 3) = 0;
+
+    F = U1*D1*V1';
+end
+
+% ---- w/out normalization ---- 
+F = EightPointsAlgorithm(P1, P2);
+visualizeEpipolarLines(img1, img2, F, P1orig, P2orig, 1);
+
+% ---- w/ normalization ----
+Fn = EightPointsAlgorithmN(P1, P2);
+figure
+visualizeEpipolarLines(img1, img2, Fn, P1orig, P2orig, 2);
+
+
+% ---- evaluation ----
+z = []
+for i = 1:n
+    z(i) = P2(:, i)' * Fn * P1(:, i);
+end 
+
+TH = 1e-2
+
+sum(z<TH) 
+
+% pause
+% % close all
+% visualizeEpipolarLines(img1, img2, F, [], [], 110);
+%% Part 1: w/ Mire
+clc;
+close all;
+
+% Load images
+img1 = imread('media/Mire1.pgm');
+img2 = imread('media/Mire2.pgm');
+
+% Load points
+P1orig = load('media/Mire1.points');
+P2orig = load('media/Mire2.points');
+
+n = size(P1orig,1);
+
+% Add the third component to work in homogeneous coordinates
+P1 = [P1orig'; ones(1,n)];
+P2 = [P2orig'; ones(1,n)];
+
+% ---- w/out normalization ---- 
+F = EightPointsAlgorithm(P1, P2);
+visualizeEpipolarLines(img1, img2, F, P1orig, P2orig, 1);
+
+% ---- w/ normalization ----
+Fn = EightPointsAlgorithmN(P1, P2);
+figure
+visualizeEpipolarLines(img1, img2, Fn, P1orig, P2orig, 2);
+
+
+%% Part 2: assessing the use of RANSAC 
+clc, clear all;
+
+% Load images
+img1 = imread('Rubik/Rubik1.pgm');
+img2 = imread('Rubik/Rubik2.pgm');
+
+% Load points
+P1orig = load('Rubik/Rubik1.points');
+P2orig = load('Rubik/Rubik2.points');
+
+% Add random points (to assess RANSAC)
+x1r = double(round(size(img1,1)*rand(5,1)));
+y1r = double(round(size(img1,2)*rand(5,1)));
+
+x2r = double(round(size(img2,1)*rand(5,1)));
+y2r = double(round(size(img2,2)*rand(5,1)));
+
+P1orign = [P1orig; [x1r, y1r]];
+P2orign = [P2orig; [x2r, y2r]];
+
+n = size(P1orign,1);
+
+% Add the third component to work in homogeneous coordinates
+P1 = [P1orign'; ones(1,n)];
+P2 = [P2orign'; ones(1,n)];
+
+% -------------------------------------------------------------------------
+% Estimate the fundamental matrix with RANSAC
+th = 10^(-2);
+[F, consensus, outliers] = ransacF(P1, P2, th);
+% -------------------------------------------------------------------------
+
+% Visualize the epipolar lines
+visualizeEpipolarLines(img1, img2, F, P1orig, P2orig, 120);
+
+
+%% Part 3: using image matching+ransac
+clc, close all, clear all;
+% -------------------------------------------------------------------------
+addpath('../../ImageMatching/'); % fix the path to include last lecture functions
+% -------------------------------------------------------------------------
+
+% Load images
+img1 = rgb2gray(imread('OtherPairs/Img6.jpeg'));
+img2 = rgb2gray(imread('OtherPairs/Img5.jpeg'));
+
+img1 = imresize(img1, 0.5);
+img2 = imresize(img2, 0.5);
+
+% extraction of keypoints and matching
+list = imageMatching(img1, img2, 'POSNCC', 0.65, 1, 100);
+
+n = size(list,1);
+
+% Add the third component to work in homogeneous coordinates
+P1 = [list(:,2)'; list(:,1)'; ones(1,n)];
+P2 = [list(:,4)'; list(:,3)'; ones(1,n)];
+
+% Estimate the fundamental matrix with RANSAC
+th = 10^(-2);
+[F, consensus, outliers] = ransacF(P1, P2, th);
+
+% Visualize the epipolar lines
+visualizeEpipolarLines(img1, img2, F, P1(1:2,:)', P2(1:2,:)', 130);

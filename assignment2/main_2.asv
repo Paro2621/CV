@@ -6,7 +6,7 @@ clear, clc;
 addpath("testimages/")
 
 img_rgb=imread('i235.png');
-figure,image(img_rgb), axis square, colormap gray
+figure,image(img_rgb), axis equal, colormap gray
 title("initial image")
 
 % Harris corner detector
@@ -74,16 +74,9 @@ subplot(1,2,2), imagesc(Iy),colormap gray,title('Iy'),axis square
 
 figure
 subplot(2,2,1), imagesc(Ix2),colormap gray,title('I^2_x'),axis square
-subplot(2,2,2), imagesc(Ixy),colormap gray,title('I_yI_x'),axis square
-subplot(2,2,3), imagesc(Ixy),colormap gray,title('I_yI_x'),axis square
-subplot(2,2,4), imagesc(Iy2),colormap gray,title('I^2_y'),axis square
-
-figure
-subplot(2,2,1), imagesc(Sx2),colormap gray,title('S^2_x'),axis square
-subplot(2,2,2), imagesc(Sxy),colormap gray,title('S_yS_x'),axis square
-subplot(2,2,3), imagesc(Sxy),colormap gray,title('S_yS_x'),axis square
-subplot(2,2,4), imagesc(Sy2),colormap gray,title('S^2_y'),axis square
-
+subplot(2,2,2), imagesc(IyIx),colormap gray,title('I_yI_x'),axis square
+subplot(2,2,3), imagesc(Ix.*Iy),colormap gray,title('I_yI_x'),axis square
+subplot(2,2,4), imagesc(Iy.*Iy),colormap gray,title('I^2_y'),axis square
 
 % gaussian filter
 figure,
