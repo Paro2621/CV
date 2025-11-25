@@ -3,14 +3,15 @@ clear, clc;
 close all;
 
 addpath('include')
+addpath('media')
 
 % Load images
-img1 = imread('media/Rubik1.pgm');
-img2 = imread('media/Rubik2.pgm');
+img1 = imread('Rubik1.pgm');
+img2 = imread('Rubik2.pgm');
 
 % Load points
-P1orig = load('media/Rubik1.points'); % [13r, 2c]
-P2orig = load('media/Rubik2.points');
+P1orig = load('Rubik1.points'); % [13r, 2c]
+P2orig = load('Rubik2.points');
 
 %P1orig = P1orig(1:10,:);
 %P2orig = P2orig(1:10,:);
@@ -50,6 +51,7 @@ end
 
 % ---- w/out normalization ---- 
 F = EightPointsAlgorithm(P1, P2);
+figure
 visualizeEpipolarLines(img1, img2, F, P1orig, P2orig, 1);
 
 % ---- w/ normalization ----
@@ -58,6 +60,7 @@ figure
 visualizeEpipolarLines(img1, img2, Fn, P1orig, P2orig, 2);
 
 
+% task 2.1 - epipolar constraint check
 % ---- evaluation ----
 z = []
 for i = 1:n
@@ -72,16 +75,17 @@ sum(z<TH)
 % % close all
 % visualizeEpipolarLines(img1, img2, F, [], [], 110);
 %% Part 1: w/ Mire
-clc;
-close all;
+clc; clear;
+addpath('include')
+addpath('media')
 
 % Load images
-img1 = imread('media/Mire1.pgm');
-img2 = imread('media/Mire2.pgm');
+img1 = imread('Mire1.pgm');
+img2 = imread('Mire2.pgm');
 
 % Load points
-P1orig = load('media/Mire1.points');
-P2orig = load('media/Mire2.points');
+P1orig = load('Mire1.points');
+P2orig = load('Mire2.points');
 
 n = size(P1orig,1);
 
@@ -91,6 +95,7 @@ P2 = [P2orig'; ones(1,n)];
 
 % ---- w/out normalization ---- 
 F = EightPointsAlgorithm(P1, P2);
+figure
 visualizeEpipolarLines(img1, img2, F, P1orig, P2orig, 1);
 
 % ---- w/ normalization ----
@@ -101,14 +106,16 @@ visualizeEpipolarLines(img1, img2, Fn, P1orig, P2orig, 2);
 
 %% Part 2: assessing the use of RANSAC 
 clc, clear all;
+addpath('include')
+addpath('media')
 
 % Load images
-img1 = imread('Rubik/Rubik1.pgm');
-img2 = imread('Rubik/Rubik2.pgm');
+img1 = imread('Rubik1.pgm');
+img2 = imread('Rubik2.pgm');
 
 % Load points
-P1orig = load('Rubik/Rubik1.points');
-P2orig = load('Rubik/Rubik2.points');
+P1orig = load('Rubik1.points');
+P2orig = load('Rubik2.points');
 
 % Add random points (to assess RANSAC)
 x1r = double(round(size(img1,1)*rand(5,1)));
@@ -135,16 +142,14 @@ th = 10^(-2);
 % Visualize the epipolar lines
 visualizeEpipolarLines(img1, img2, F, P1orig, P2orig, 120);
 
-
 %% Part 3: using image matching+ransac
 clc, close all, clear all;
-% -------------------------------------------------------------------------
-addpath('../../ImageMatching/'); % fix the path to include last lecture functions
-% -------------------------------------------------------------------------
+addpath('include')
+addpath('media')
 
 % Load images
-img1 = rgb2gray(imread('OtherPairs/Img6.jpeg'));
-img2 = rgb2gray(imread('OtherPairs/Img5.jpeg'));
+img1 = rgb2gray(imread('Img6.jpeg'));
+img2 = rgb2gray(imread('Img5.jpeg'));
 
 img1 = imresize(img1, 0.5);
 img2 = imresize(img2, 0.5);
