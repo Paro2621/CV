@@ -71,6 +71,15 @@ TH = 1e-2
 
 sum(z<TH) 
 
+% task 2.2 - epipoles
+[U, W, V] = svd(Fn);
+
+disp("Left epipoles") 
+disp(U(:, end)')
+
+disp("Right epipoles") 
+disp(V(:, end)')
+
 % pause
 % % close all
 % visualizeEpipolarLines(img1, img2, F, [], [], 110);
@@ -139,6 +148,8 @@ th = 10^(-2);
 [F, consensus, outliers] = ransacF(P1, P2, th);
 % -------------------------------------------------------------------------
 
+
+%
 % Visualize the epipolar lines
 visualizeEpipolarLines(img1, img2, F, P1orig, P2orig, 120);
 
@@ -148,8 +159,8 @@ addpath('include')
 addpath('media')
 
 % Load images
-img1 = rgb2gray(imread('Img6.jpeg'));
-img2 = rgb2gray(imread('Img5.jpeg'));
+img1 = rgb2gray(imread('charbel_side1.jpg'));
+img2 = rgb2gray(imread('charbel_side2.jpg'));
 
 img1 = imresize(img1, 0.5);
 img2 = imresize(img2, 0.5);
@@ -169,3 +180,12 @@ th = 10^(-2);
 
 % Visualize the epipolar lines
 visualizeEpipolarLines(img1, img2, F, P1(1:2,:)', P2(1:2,:)', 130);
+
+[U, W, V] = svd(F);
+
+disp("Left epipoles") 
+disp(U(:, end)')
+
+disp("Right epipoles") 
+disp(V(:, end)')
+
