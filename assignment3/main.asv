@@ -1,6 +1,6 @@
 % TODO
 % IF WE CHANGE THE NUMBER OF POINTS TO ESTIMATE F ? WHAT CHANGES?
-% FOR OUR IMAGE DISCUSS HOW WE FOUND THE POINTS  
+% FOR OUR IMAGE HOW WE FOUND THE POINTS 
 
 %% Part 1: estimation of the fundamental matrix with manually selected correspondences
 clear, clc;
@@ -120,7 +120,7 @@ Fn = EightPointsAlgorithmN(P1, P2);
 figure
 visualizeEpipolarLines(img1, img2, Fn, P1orig, P2orig, 2);
 
-% task 2.1 - epipolar constraint check
+%% task 2.1 - epipolar constraint check
 % ---- evaluation ----
 z = [];
 for i = 1:n
@@ -181,7 +181,7 @@ th = 10^(-2);
 % Visualize the epipolar lines
 visualizeEpipolarLines(img1, img2, F, P1orig, P2orig, 120);
 
-% epipolar constraint check
+%% task 2.1 - epipolar constraint check
 % ---- evaluation ----
 z = [];
 for i = 1:n

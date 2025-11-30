@@ -4,8 +4,8 @@ function [newpts, T] = normalise2dpts(pts)
         error('pts must be 3xN');
     end
     
-    % Find the indices of the points that are not at infinity
-    finiteind = find(abs(pts(3,:)) > eps);
+    % Find the indices of the points that are not at infinity (x y 0)
+    finiteind = find(abs(pts(3,:)) > eps); % gives the index of normal points (x y 1)
     
     if length(finiteind) ~= size(pts,2)
         warning('Some points are at infinity');
