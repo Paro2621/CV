@@ -57,6 +57,30 @@ end
 F = EightPointsAlgorithm(P1, P2);
 figure
 visualizeEpipolarLines(img1, img2, F, P1orig, P2orig, 1);
+title("Non-Normalized points");
+
+% ---- evaluation ----
+z = [];
+for i = 1:n
+    z(i) = P2(:, i)' * F * P1(:, i);
+end 
+
+TH = 1e-2;
+z
+abs(z)
+
+%this gives us better results because we take the average rather then the
+%sum, so it is not effected by the number of points
+mean_error= mean(abs(z));
+
+
+if mean_error < 1e-2
+    disp('Constraint holds');
+    disp(mean_error);
+else
+    disp('Constraint violated');
+    disp(mean_error);
+end
 
 % ---- w/ normalization ----
 Fn = EightPointsAlgorithmN(P1, P2);
@@ -74,9 +98,15 @@ end
 
 TH = 1e-2;
 z
-abs(z)
-sum(abs(z))
-sum(abs(z))< TH % false!!! without normal. the values are worse!
+mean_error= mean(abs(z));
+
+if mean_error < 1e-2
+    disp('Constraint holds');
+    disp(mean_error);
+else
+    disp('Constraint violated');
+    disp(mean_error);
+end
 
 % task 2.2 - epipoles
 [U, W, V] = svd(Fn);
@@ -115,11 +145,36 @@ P2 = [P2orig'; ones(1,n)];
 F = EightPointsAlgorithm(P1, P2);
 figure
 visualizeEpipolarLines(img1, img2, F, P1orig, P2orig, 1);
+title("Non-Normalized points");
+
+% ---- evaluation ----
+z = [];
+for i = 1:n
+    z(i) = P2(:, i)' * F * P1(:, i);
+end 
+
+TH = 1e-2;
+z
+abs(z)
+
+%this gives us better results because we take the average rather then the
+%sum, so it is not effected by the number of points
+mean_error= mean(abs(z));
+
+
+if mean_error < 1e-2
+    disp('Constraint holds');
+    disp(mean_error);
+else
+    disp('Constraint violated');
+    disp(mean_error);
+end
 
 % ---- w/ normalization ----
 Fn = EightPointsAlgorithmN(P1, P2);
 figure
 visualizeEpipolarLines(img1, img2, Fn, P1orig, P2orig, 2);
+title("Normalized points");
 
 % task 2.1 - epipolar constraint check
 % ---- evaluation ----
@@ -131,8 +186,20 @@ end
 TH = 1e-2;
 z
 abs(z)
-sum(abs(z))
-sum(abs(z))< TH % false!!! without normal. the values are worse!
+
+%this gives us better results because we take the average rather then the
+%sum, so it is not effected by the number of points
+mean_error= mean(abs(z));
+
+
+if mean_error < 1e-2
+    disp('Constraint holds');
+    disp(mean_error);
+else
+    disp('Constraint violated');
+    disp(mean_error);
+end
+ % false!!! without normal. the values are worse!
 
 % task 2.2 - epipoles
 [U, W, V] = svd(Fn);
@@ -149,13 +216,23 @@ clc, clear all;
 addpath('include')
 addpath('media')
 
-% Load images
+%-----Rubik------
+% % Load images
 img1 = imread('Rubik1.pgm');
 img2 = imread('Rubik2.pgm');
 
 % Load points
 P1orig = load('Rubik1.points');
 P2orig = load('Rubik2.points');
+
+%----Mire------
+% Load images
+% img1 = imread('Mire1.pgm');
+% img2 = imread('Mire2.pgm');
+% 
+% % Load points
+% P1orig = load('Mire1.points');
+% P2orig = load('Mire2.points');
 
 % Add random points (to assess RANSAC)
 x1r = double(round(size(img1,1)*rand(5,1)));
@@ -184,7 +261,9 @@ P1_inliers = consensus(1:3, :);
 P2_inliers = consensus(4:6, :);
 
 % Visualize the epipolar lines
+figure
 visualizeEpipolarLines(img1, img2, F, P1_inliers(1:2, :)', P2_inliers(1:2, :)', 120);
+title("RANSAC")
 
 % epipolar constraint check on inliers only
 % ---- evaluation ----
@@ -203,6 +282,7 @@ mean_error = mean(abs(z)); % Better to use mean than sum
 max_error = max(abs(z));   % Check the worst outlier
 
 disp(['Mean Algebraic Error: ', num2str(mean_error)]);
+disp(['Max Algebraic Error: ', num2str(max_error)]);
 
 % 3. Boolean Check
 TH = 1e-2; % Threshold
@@ -214,9 +294,6 @@ else
     disp('Epipolar constraint violated (or F is incorrect).');
 end
 
-% abs(z)
-% sum(abs(z))
-% sum(abs(z))< TH % false!!! without normal. the values are worse!
 
 % task 2.2 - epipoles
 [U, W, V] = svd(F);
@@ -254,8 +331,12 @@ P2 = [list(:,4)'; list(:,3)'; ones(1,n)];
 th = 10^(-2);
 [F, consensus, outliers] = ransacF(P1, P2, th);
 
+% EXTRACT ONLY THE GOOD MATCHES (INLIERS)
+P1_inliers = consensus(1:3, :);
+P2_inliers = consensus(4:6, :);
+
 % Visualize the epipolar lines
-visualizeEpipolarLines(img1, img2, F, P1(1:2,:)', P2(1:2,:)', 130);
+visualizeEpipolarLines(img1, img2, F, P1_inliers(1:2, :)', P2_inliers(1:2, :)', 130);
 
 [U, W, V] = svd(F);
 
