@@ -62,6 +62,7 @@ visualizeEpipolarLines(img1, img2, F, P1orig, P2orig, 1);
 Fn = EightPointsAlgorithmN(P1, P2);
 figure
 visualizeEpipolarLines(img1, img2, Fn, P1orig, P2orig, 2);
+title("Normalized points");
 
 
 % task 2.1 - epipolar constraint check
@@ -178,21 +179,44 @@ th = 10^(-2);
 [F, consensus, outliers] = ransacF(P1, P2, th);
 % -------------------------------------------------------------------------
 
-% Visualize the epipolar lines
-visualizeEpipolarLines(img1, img2, F, P1orig, P2orig, 120);
+% EXTRACT ONLY THE GOOD MATCHES (INLIERS)
+P1_inliers = consensus(1:3, :);
+P2_inliers = consensus(4:6, :);
 
-% epipolar constraint check
+% Visualize the epipolar lines
+visualizeEpipolarLines(img1, img2, F, P1_inliers(1:2, :)', P2_inliers(1:2, :)', 120);
+
+% epipolar constraint check on inliers only
 % ---- evaluation ----
 z = [];
-for i = 1:n
-    z(i) = P2(:, i)' * F * P1(:, i);
-end 
+num_inliers = size(P1_inliers, 2); 
+
+for i = 1:num_inliers
+    % Calculate x' * F * x
+    z(i) = P2_inliers(:, i)' * F * P1_inliers(:, i);
+end
 
 TH = 1e-2;
-z
-abs(z)
-sum(abs(z))
-sum(abs(z))< TH % false!!! without normal. the values are worse!
+z;
+% 2. Analysis
+mean_error = mean(abs(z)); % Better to use mean than sum
+max_error = max(abs(z));   % Check the worst outlier
+
+disp(['Mean Algebraic Error: ', num2str(mean_error)]);
+
+% 3. Boolean Check
+TH = 1e-2; % Threshold
+is_valid = mean_error < TH;
+
+if is_valid
+    disp('Epipolar constraint holds.');
+else
+    disp('Epipolar constraint violated (or F is incorrect).');
+end
+
+% abs(z)
+% sum(abs(z))
+% sum(abs(z))< TH % false!!! without normal. the values are worse!
 
 % task 2.2 - epipoles
 [U, W, V] = svd(F);
