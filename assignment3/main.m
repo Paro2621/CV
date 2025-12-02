@@ -1,7 +1,3 @@
-% TODO
-% IF WE CHANGE THE NUMBER OF POINTS TO ESTIMATE F ? WHAT CHANGES?
-% FOR OUR IMAGE DISCUSS HOW WE FOUND THE POINTS  
-
 %% Part 1: estimation of the fundamental matrix with manually selected correspondences
 clear, clc;
 close all;
@@ -74,7 +70,7 @@ abs(z)
 mean_error= mean(abs(z));
 
 
-if mean_error < 1e-2
+if mean_error < TH
     disp('Constraint holds');
     disp(mean_error);
 else
@@ -100,7 +96,7 @@ TH = 1e-2;
 z
 mean_error= mean(abs(z));
 
-if mean_error < 1e-2
+if mean_error < TH
     disp('Constraint holds');
     disp(mean_error);
 else
@@ -162,7 +158,7 @@ abs(z)
 mean_error= mean(abs(z));
 
 
-if mean_error < 1e-2
+if mean_error < TH
     disp('Constraint holds');
     disp(mean_error);
 else
@@ -187,12 +183,9 @@ TH = 1e-2;
 z
 abs(z)
 
-%this gives us better results because we take the average rather then the
-%sum, so it is not effected by the number of points
 mean_error= mean(abs(z));
 
-
-if mean_error < 1e-2
+if mean_error < TH
     disp('Constraint holds');
     disp(mean_error);
 else
@@ -275,8 +268,6 @@ for i = 1:num_inliers
     z(i) = P2_inliers(:, i)' * F * P1_inliers(:, i);
 end
 
-TH = 1e-2;
-z;
 % 2. Analysis
 mean_error = mean(abs(z)); % Better to use mean than sum
 max_error = max(abs(z));   % Check the worst outlier

@@ -9,7 +9,7 @@ function [bestF, consensus, outliers] = ransacF(P1, P2, th)
 
     bestF = zeros(3, 3);
     bestNInlier = 0.;
-    p = 0.999;
+    p = 0.999; % desired probability of success (99.9%)
 
     consensus = [];
     outliers = [];
@@ -22,9 +22,9 @@ function [bestF, consensus, outliers] = ransacF(P1, P2, th)
 
         F = EightPointsAlgorithmN(P1iter, P2iter);
 
-        residuals = testF(F, P1, P2); 
+        residuals = testF(F, P1, P2); % compute epipolar constraint for each remaining pair
 
-        nInlier = sum(residuals < th)/N; % current percentage of estimated inliers
+        nInlier = sum(residuals < th)/N; % current percentage of estimated inliers, points that have a residual below a threshold
         disp(sprintf('Iteration %d : Inliers are %.2f %%', ii, nInlier*100));
 
         if(nInlier > bestNInlier) % if number of inliers grows
