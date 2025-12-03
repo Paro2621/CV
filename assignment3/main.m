@@ -62,8 +62,6 @@ for i = 1:n
 end 
 
 TH = 1e-2;
-z
-abs(z)
 
 %this gives us better results because we take the average rather then the
 %sum, so it is not effected by the number of points
@@ -93,7 +91,6 @@ for i = 1:n
 end 
 
 TH = 1e-2;
-z
 mean_error= mean(abs(z));
 
 if mean_error < TH
@@ -150,8 +147,6 @@ for i = 1:n
 end 
 
 TH = 1e-2;
-z
-abs(z)
 
 %this gives us better results because we take the average rather then the
 %sum, so it is not effected by the number of points
@@ -180,9 +175,6 @@ for i = 1:n
 end 
 
 TH = 1e-2;
-z
-abs(z)
-
 mean_error= mean(abs(z));
 
 if mean_error < TH
@@ -211,21 +203,21 @@ addpath('media')
 
 %-----Rubik------
 % % Load images
-img1 = imread('Rubik1.pgm');
-img2 = imread('Rubik2.pgm');
-
-% Load points
-P1orig = load('Rubik1.points');
-P2orig = load('Rubik2.points');
+% img1 = imread('Rubik1.pgm');
+% img2 = imread('Rubik2.pgm');
+% 
+% % Load points
+% P1orig = load('Rubik1.points');
+% P2orig = load('Rubik2.points');
 
 %----Mire------
 % Load images
-% img1 = imread('Mire1.pgm');
-% img2 = imread('Mire2.pgm');
-% 
-% % Load points
-% P1orig = load('Mire1.points');
-% P2orig = load('Mire2.points');
+img1 = imread('Mire1.pgm');
+img2 = imread('Mire2.pgm');
+
+% Load points
+P1orig = load('Mire1.points');
+P2orig = load('Mire2.points');
 
 % Add random points (to assess RANSAC)
 x1r = double(round(size(img1,1)*rand(5,1)));
