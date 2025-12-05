@@ -4,7 +4,7 @@ function [d] = similarity(sim, f1, f2, p1, p2, d1, d2, sigma)
 %   sim       a string controlling the similarity function
 %   f1 f2     positions of the features (1x2 vectors)
 %   p1 p2     patches to be used for the computations, only for 'NCC' mode
-%   d1 d2     SURF descriptors (128x1 vectors)
+%   d1 d2     SURF descriptors (128x1 vectors)he requested similarity value for t
 %   sigma     scale for the exponential when using positions
 % returns the requested similarity value for the given pair of features
 

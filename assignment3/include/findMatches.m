@@ -41,8 +41,7 @@ plot(F2(1,:), F2(2,:), '*');
 
 % From now on, we use F1, D1 and F2, D2
 if(strcmp(type, 'POS'))
-    
-    %% MATCHING CONSIDERING EUCLIDEAN DISTANCE BETWEEN POSITIONS
+    % MATCHING CONSIDERING EUCLIDEAN DISTANCE BETWEEN POSITIONS
 
     % Initialize the affinity matrix
     A = zeros(size(F1,2), size(F2, 2));
@@ -58,8 +57,7 @@ if(strcmp(type, 'POS'))
     end
 
 elseif(strcmp(type, 'NCC'))
-    
-    %% MATCHING CONSIDERING PATCHES SIMILARITY
+    % MATCHING CONSIDERING PATCHES SIMILARITY
 
     % SET THE PATCH SIZE (for the NCC contribution) TO AN APPROPRIATE VALUE 
     % (delta is half the size of the patch, i.e. if delta=2 the patch is 5x5)
@@ -86,8 +84,7 @@ elseif(strcmp(type, 'NCC'))
     end
 
 elseif(strcmp(type, 'POSNCC'))
-    
-    %% MATCHING CONSIDERING EUCLIDEAN DISTANCE BETWEEN POSITIONS AND PATCHES SIMILARITY
+    % MATCHING CONSIDERING EUCLIDEAN DISTANCE BETWEEN POSITIONS AND PATCHES SIMILARITY
 
     % SET THE PATCH SIZE (for the NCC contribution) TO AN APPROPRIATE VALUE 
     % (delta is half the size of the patch, i.e. if delta=2 the patch is 5x5)
@@ -114,9 +111,7 @@ elseif(strcmp(type, 'POSNCC'))
     end
 
 elseif(strcmp(type,'POSSURF'))
-
-
-    %% MATCHING USING POSITIONS AND SIFT DESCRIPTORS
+    % MATCHING USING POSITIONS AND SIFT DESCRIPTORS
 
     A = zeros(size(D1, 2), size(D2, 2));
 
@@ -142,9 +137,6 @@ if(withSVD==1)
 else
     A1 = A;
 end
-
-
-
 
 % Detecting good matches
 list = [];

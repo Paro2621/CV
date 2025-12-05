@@ -301,9 +301,11 @@ img2 = rgb2gray(imread('charbel_side2.jpg'));
 img1 = imresize(img1, 0.5);
 img2 = imresize(img2, 0.5);
 
+% w/out RANSAC
 % extraction of keypoints and matching
 list = imageMatching(img1, img2, 'POSNCC', 0.65, 1, 100);
 
+% w/ RANSAC
 n = size(list,1);
 
 % Add the third component to work in homogeneous coordinates
