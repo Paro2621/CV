@@ -16,6 +16,37 @@ function [] = compareCDAlgo(videoFile, tau1, alpha, tau2)
 % Create a VideoReader object
 videoReader = VideoReader(videoFile);
 
+% compute background
+% background duration (1 minute)
+maxTime = 60;   % seconds
+
+% Read first frame to get dimensions
+firstFrame = rgb2gray(readFrame(videoReader));
+[H, W] = size(firstFrame);
+
+% Initialize background structure
+bgModel.sum   = zeros(H, W, 'double');   % Accumulate pixel values
+bgModel.count = 0;                          % Number of frames
+bgModel.mean  = [];
+
+% Accumulate frames for first 1 minute
+% Add first frame
+bgModel.sum   = bgModel.sum + double(firstFrame);
+bgModel.count = bgModel.count + 1;
+
+while hasFrame(videoReader) && videoReader.CurrentTime < maxTime
+
+    frame = rgb2gray(readFrame(videoReader));
+
+    bgModel.sum   = bgModel.sum + double(frame);
+    bgModel.count = bgModel.count + 1;
+end
+
+% Compute per-pixel mean background
+bgModel.mean = uint8(bgModel.sum / bgModel.count);
+fprintf('Background computed from %d frames (%.2f seconds)\n',bgModel.count, videoReader.CurrentTime);
+
+
 % Loop through each frame of the video
 while hasFrame(videoReader)
     % Read the next frame
@@ -25,25 +56,25 @@ while hasFrame(videoReader)
     figure(1), subplot(2, 3, 1), imshow(frame, 'Border', 'tight');
     title(sprintf('Frame %d', round(videoReader.CurrentTime * videoReader.FrameRate)));
 
-    % Fake image, just for the sake of running --> In the visualization
-    % below replace with the appropriate image
-    fake_img = uint8(128*ones(size(frame)));
-
+    %binary map
+    Mt= abs(frame - bgModel.mean)> tau1;
+ 
     % Display the static background
-    figure(1), subplot(2, 3, 2), imshow(fake_img, 'Border', 'tight');
+    figure(1), subplot(2, 3, 2), imshow(bgModel.mean, 'Border', 'tight');
     title('Static background');
 
     % Display the binary map obtained with the static background
-    figure(1), subplot(2, 3, 3), imshow(fake_img, 'Border', 'tight');
+    figure(1), subplot(2, 3, 3), imshow(Mt, 'Border', 'tight');
     title('Binary map 1');
 
-    % Display the running average
-    figure(1), subplot(2, 3, 5), imshow(fake_img, 'Border', 'tight');
-    title('Running average');
-
-    % Display the binary map obtained with the running average
-    figure(1), subplot(2, 3, 6), imshow(fake_img, 'Border', 'tight');
-    title('Binary map 2');
+    % % Display the running average
+    % figure(1), subplot(2, 3, 5), imshow(fake_img, 'Border', 'tight');
+    % title('Running average');
+    % 
+    % % Display the binary map obtained with the running average
+    % figure(1), subplot(2, 3, 6), imshow(fake_img, 'Border', 'tight');
+    % title('Binary map 2');
+    pause(0.01)
 
 end
 
