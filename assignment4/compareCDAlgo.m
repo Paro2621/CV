@@ -16,18 +16,16 @@ function [] = compareCDAlgo(videoFile, tau1, alpha, tau2)
 % Create a VideoReader object
 videoReader = VideoReader(videoFile);
 
-% compute background
+% -------------------compute static background-----------------------
 % background duration (1 minute)
-maxTime = 60;   % seconds
+maxTime = 60;  
 
-% Read first frame to get dimensions
 firstFrame = rgb2gray(readFrame(videoReader));
 [H, W] = size(firstFrame);
 
 % Initialize background structure
 bgModel.sum   = zeros(H, W, 'double');   % Accumulate pixel values
 bgModel.count = 0;                          % Number of frames
-bgModel.mean  = [];
 
 % Accumulate frames for first 1 minute
 % Add first frame
@@ -43,43 +41,59 @@ while hasFrame(videoReader) && videoReader.CurrentTime < maxTime
 end
 
 % Compute per-pixel mean background
-bgModel.mean = uint8(bgModel.sum / bgModel.count);
+staticBg = double(bgModel.sum / bgModel.count);
 fprintf('Background computed from %d frames (%.2f seconds)\n',bgModel.count, videoReader.CurrentTime);
 
 
-% Loop through each frame of the video
+% --------------------running average--------------------------
+%we compute the difference between two consecutive frames to understand if a pixel is moving or not
+runningBg = staticBg;
+previous_frame = firstFrame;
+
 while hasFrame(videoReader)
-    % Read the next frame
-    frame = readFrame(videoReader);
+
+    frame = rgb2gray(readFrame(videoReader));
+
+    % -------- STATIC BG --------
+    Mt1 = abs(double(frame) - staticBg) > tau1;
+
+    % -------- RUNNING AVG --------
+    Dt = abs(double(frame) - double(previous_frame));
+    motionMask = Dt > tau2;
+
+    % update background where no motion
+    runningBg(~motionMask) = (1-alpha)*runningBg(~motionMask) + alpha*double(frame(~motionMask));
+
+    Mt2 = abs(double(frame) - runningBg) > tau1;
+
+    previous_frame = frame;
+
 
     % Display the frame
     figure(1), subplot(2, 3, 1), imshow(frame, 'Border', 'tight');
     title(sprintf('Frame %d', round(videoReader.CurrentTime * videoReader.FrameRate)));
-
-    %binary map
-    Mt= abs(frame - bgModel.mean)> tau1;
- 
+   
     % Display the static background
-    figure(1), subplot(2, 3, 2), imshow(bgModel.mean, 'Border', 'tight');
+    figure(1), subplot(2, 3, 2), imshow(uint8(staticBg), 'Border', 'tight');
     title('Static background');
 
     % Display the binary map obtained with the static background
-    figure(1), subplot(2, 3, 3), imshow(Mt, 'Border', 'tight');
+    figure(1), subplot(2, 3, 3), imshow(Mt1, 'Border', 'tight');
     title('Binary map 1');
 
-    % % Display the running average
-    % figure(1), subplot(2, 3, 5), imshow(fake_img, 'Border', 'tight');
-    % title('Running average');
-    % 
-    % % Display the binary map obtained with the running average
-    % figure(1), subplot(2, 3, 6), imshow(fake_img, 'Border', 'tight');
-    % title('Binary map 2');
+    % Display the running average
+    figure(1), subplot(2, 3, 5), imshow(uint8(runningBg), 'Border', 'tight');
+    title('Running average');
+
+    % Display the binary map obtained with the running average
+    figure(1), subplot(2, 3, 6), imshow(Mt2, 'Border', 'tight');
+    title('Binary map 2');
     pause(0.01)
 
 end
 
 % Close the figure when playback is finished
-close all;
+% close all force;
 
 fprintf('Finished displaying video: %s\n', videoFile);
 end
