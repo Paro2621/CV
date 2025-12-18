@@ -89,11 +89,7 @@ while hasFrame(videoReader)
     figure(1), subplot(2, 3, 6), imshow(Mt2, 'Border', 'tight');
     title('Binary map 2');
     pause(0.01)
-
-end
-
-% Close the figure when playback is finished
-% close all force;
+    end
 
 fprintf('Finished displaying video: %s\n', videoFile);
 end

@@ -17,8 +17,6 @@ firstFrame = rgb2gray(readFrame(videoReader));
 runningBg = double(firstFrame);
 previous_frame = firstFrame;
 
-% i = 0;
-
 % Loop through each frame of the video
 while hasFrame(videoReader)
     % Read the next frame
@@ -94,9 +92,7 @@ while hasFrame(videoReader)
     pause(0.01)
     
     previous_frame = frame;
-    % i = i + 1;
-
-end
+    end
 
 fprintf('Finished displaying video: %s\n', videoFile);
 end
