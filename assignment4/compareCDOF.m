@@ -84,7 +84,7 @@ while hasFrame(videoReader)
 
     % Display the running average
     figure(1), subplot(2, 2, 4), imshow(uint8(runningBg), 'Border', 'tight');
-    title('Static background');
+    title('background');
 
     % Display the binary map obtained with the change detection
     figure(1), subplot(2, 2, 3), imshow(Mt2, 'Border', 'tight');
