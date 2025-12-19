@@ -8,17 +8,27 @@ function [] = segmentAndTrack(videoFile, tau1, alpha, tau2)
 
 % Create a VideoReader object
 videoReader = VideoReader(videoFile);
+
+startFrame = 1300;
+videoReader.CurrentTime = startFrame / videoReader.FrameRate;
+
 firstFrame = rgb2gray(readFrame(videoReader));
 runningBg = double(firstFrame);
 previous_frame = firstFrame;
-i = 0;
+
+i = startFrame;
+
+% Tracker initialization
+trajectory = [];
+pointTrackerInitialized = false;
+
 
 % Loop through each frame of the video
 while hasFrame(videoReader)
     % Read the next frame
     frame = rgb2gray(readFrame(videoReader));
 
-     % -------- RUNNING AVG --------
+    % -------- RUNNING AVG --------
     Dt = abs(double(frame) - double(previous_frame));
     motionMask = Dt > tau2;
 
@@ -27,38 +37,41 @@ while hasFrame(videoReader)
     Mt2 = abs(double(frame) - runningBg) > tau1;
 
     % Display the frame
-    figure(1), subplot(2,2,1), imshow(frame, 'Border', 'tight');
+    figure(1)
+    subplot(2,2,1), imshow(frame, 'Border', 'tight');
     title(sprintf('Frame %d', round(videoReader.CurrentTime * videoReader.FrameRate)));
-
-    % Display the running average
-    figure(1), subplot(2, 2, 3), imshow(uint8(runningBg), 'Border', 'tight');
+    subplot(2, 2, 3), imshow(uint8(runningBg), 'Border', 'tight');
     title('background');
-
-    % Display the binary map obtained with the change detection
-    figure(1), subplot(2, 2, 2), imshow(Mt2, 'Border', 'tight');
+    subplot(2, 2, 2), imshow(Mt2, 'Border', 'tight');
     title('Binary map 1');
-    pause(0.001)
+    pause(0.0001)
     
-    % Update the running average and perform change detection
 
-    if(i == 1380)
-        pause;
-        imshow(frame);
-        title('Click on the person wearing white');
-        pause;
-        
-        [x, y] = ginput(1);
-        x = round(x);
-        y = round(y);
-        
-        trajectory = [x, y];
-
-
+    if(i == 1380 && ~pointTrackerInitialized)
+    
         % In this frame there is a person wearing in white, this is the
         % target you must track
         % Pick a point manually on the person to initialize your trajectory
+           % Mostra il frame corrente e chiedi di selezionare la regione della persona
+        
+        figure(2), imshow(frame), title('Seleziona la persona da tracciare');
+        h = drawrectangle('Color','r'); % Disegna rettangolo manuale
+        pause; % Attende conferma
+        roiPosition = round(h.Position); % [x, y, width, height]
+        centroid = [roiPosition(1) + roiPosition(3)/2, roiPosition(2) + roiPosition(4)/2];
+        trajectory = centroid; % inizializza la traiettoria
+        pointTrackerInitialized = true;
+        close(gcf);
 
-    elseif(i > 1380)
+        % Crea grafico dinamico per tracking
+        figure(3)
+        hIm = imshow(frame); title('Tracking persona'); hold on;
+        hRect = rectangle('Position', roiPosition, 'EdgeColor', 'r', 'LineWidth', 2);
+        hTraj = plot(centroid(1), centroid(2), 'r-', 'LineWidth', 2);
+
+      
+    
+    elseif(i > 1380 && pointTrackerInitialized)
 
         % * Perform change detection and update the background model
         % * Identify the connected components in the binary map using the
@@ -68,50 +81,29 @@ while hasFrame(videoReader)
         % * Now you have the positions of all connected components observed
         %   in the current frame and you can associate the target to its new
         %   position --> Append the new position to the trajectory
+         
+        % Identifica connected components
+        CC = bwconncomp(Mt2);
+        props = regionprops(CC, 'Centroid', 'BoundingBox');
 
+        if ~isempty(props)
+            % Trova il centroide più vicino a quello precedente
+            centroids = cat(1, props.Centroid);
+            distances = sqrt(sum((centroids - trajectory(end,:)).^2, 2));
+            [~, idx] = min(distances);
+            centroid = props(idx).Centroid;
+            bb = props(idx).BoundingBox;
 
-    
-        % --- Post-processing della mappa binaria ---
-        BW = bwareaopen(Mt2, 50);      % rimuove blob piccoli (rumore)
-        BW = imfill(BW, 'holes');      % riempie i buchi
-    
-        % --- Connected Components ---
-        cc = bwconncomp(BW);
-    
-        % --- Estrazione delle proprietà ---
-        stats = regionprops(cc, 'Centroid', 'Area');
-    
-        % Se non ci sono oggetti, mantieni l'ultima posizione
-        if isempty(stats)
-            trajectory = [trajectory; trajectory(end, :)];
-        else
-            % --- Associazione del target ---
-            lastPos = trajectory(end, :);
-            minDist = inf;
-            newPos = lastPos;
-    
-            for k = 1:length(stats)
-                c = stats(k).Centroid;
-                d = norm(c - lastPos);
-    
-                if d < minDist
-                    minDist = d;
-                    newPos = c;
-                end
-            end
-    
-            % --- Aggiorna la traiettoria ---
-            trajectory = [trajectory; newPos];
+            % Aggiorna traiettoria
+            trajectory = [trajectory; centroid];
+
+            % Aggiorna grafico dinamicamente
+            set(hIm, 'CData', frame);
+            set(hRect, 'Position', bb);
+            set(hTraj, 'XData', trajectory(:,1), 'YData', trajectory(:,2));
+            drawnow;
         end
-    
-        % --- Visualizzazione del tracking ---
-        subplot(2,2,1)
-        hold on
-        plot(trajectory(:,1), trajectory(:,2), 'r-', 'LineWidth', 2)
-        plot(newPos(1), newPos(2), 'ro', 'MarkerSize', 8)
-        hold off
-
-
+       
     end
 
     previous_frame = frame;
@@ -121,9 +113,13 @@ end
 
  % * At the end of the video, visualize the trajectory in the last
  %   frame
+figure;
+imshow(frame); hold on;
+plot(trajectory(:,1), trajectory(:,2), '-r', 'LineWidth', 2);
+title('Traiettoria finale della persona');
 
 % Close the figure when playback is finished
-close all;
+% close all;
 
 fprintf('Finished displaying video: %s\n', videoFile);
 end
