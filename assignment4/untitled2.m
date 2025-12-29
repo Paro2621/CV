@@ -1,6 +1,10 @@
 clc;
 close all;
 clear;
-addpath('C:\Users\pedem\Desktop\computer vision\Assignments\videos\'); 
+%addpath('C:\Users\pedem\Desktop\computer vision\Assignments\videos\');
+addpath('videos\');
 video3="DibrisHall_3part.mp4";
-segmantAndTrack(video3,20,0.2,15)
+video2="tennis_2part.mp4";
+%segmantAndTrack(video3,20,0.2,15)
+%compareCDAlgo(video3,20,0.02,5)
+compareCDOF(video2,35,0.2,20,8)

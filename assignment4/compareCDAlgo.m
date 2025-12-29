@@ -64,6 +64,7 @@ while hasFrame(videoReader)
     % update background where no motion
     runningBg(~motionMask) = (1-alpha)*runningBg(~motionMask) + alpha*double(frame(~motionMask));
 
+    %actualy motion detected
     Mt2 = abs(double(frame) - runningBg) > tau1;
 
     previous_frame = frame;

@@ -9,6 +9,7 @@ function [] = segmentAndTrack(videoFile, tau1, alpha, tau2)
 % Create a VideoReader object
 videoReader = VideoReader(videoFile);
 
+%where the person with the white shirt appears
 startFrame = 1300;
 videoReader.CurrentTime = startFrame / videoReader.FrameRate;
 
@@ -34,6 +35,8 @@ while hasFrame(videoReader)
 
     % update background where no motion
     runningBg(~motionMask) = (1-alpha)*runningBg(~motionMask) + alpha*double(frame(~motionMask));
+    
+    %actual movement detected
     Mt2 = abs(double(frame) - runningBg) > tau1;
 
     % Display the frame
@@ -49,21 +52,23 @@ while hasFrame(videoReader)
 
     if(i == 1380 && ~pointTrackerInitialized)
     
-        % In this frame there is a person wearing in white, this is the
+        % In this frame there is a person wearing white, this is the
         % target you must track
         % Pick a point manually on the person to initialize your trajectory
-           % Mostra il frame corrente e chiedi di selezionare la regione della persona
+        % show the current frame and ask to select a person in region, then
+        % click enter to confirm region
+        % Mostra il frame corrente e chiedi di selezionare la regione della persona
         
-        figure(2), imshow(frame), title('Seleziona la persona da tracciare');
-        h = drawrectangle('Color','r'); % Disegna rettangolo manuale
+        figure(2), imshow(frame), title('Select person to trace');
+        h = drawrectangle('Color','r'); % Draw rectangle manually
         pause; % Attende conferma
         roiPosition = round(h.Position); % [x, y, width, height]
         centroid = [roiPosition(1) + roiPosition(3)/2, roiPosition(2) + roiPosition(4)/2];
-        trajectory = centroid; % inizializza la traiettoria
+        trajectory = centroid; % inizializza la trajectory
         pointTrackerInitialized = true;
         close(gcf);
 
-        % Crea grafico dinamico per tracking
+        % Create dynamic chart for tracking
         figure(3)
         hIm = imshow(frame); title('Tracking persona'); hold on;
         hRect = rectangle('Position', roiPosition, 'EdgeColor', 'r', 'LineWidth', 2);
@@ -83,21 +88,22 @@ while hasFrame(videoReader)
         %   position --> Append the new position to the trajectory
          
         % Identifica connected components
+        %looks at the binary map (Mt2) and finds the white pixels
         CC = bwconncomp(Mt2);
         props = regionprops(CC, 'Centroid', 'BoundingBox');
 
         if ~isempty(props)
-            % Trova il centroide più vicino a quello precedente
+            % Find the centroid closest to the previous one
             centroids = cat(1, props.Centroid);
             distances = sqrt(sum((centroids - trajectory(end,:)).^2, 2));
             [~, idx] = min(distances);
             centroid = props(idx).Centroid;
             bb = props(idx).BoundingBox;
 
-            % Aggiorna traiettoria
+            % Update trajectory
             trajectory = [trajectory; centroid];
 
-            % Aggiorna grafico dinamicamente
+            % Update chart dynamically
             set(hIm, 'CData', frame);
             set(hRect, 'Position', bb);
             set(hTraj, 'XData', trajectory(:,1), 'YData', trajectory(:,2));
