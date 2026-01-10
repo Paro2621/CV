@@ -2,7 +2,7 @@ clc;
 close all;
 clear;
 %addpath('C:\Users\pedem\Desktop\computer vision\Assignments\videos\');
-addpath('videos\');
+addpath('videos');
 video3="DibrisHall_3part.mp4";
 video2="tennis_2part.mp4";
 segmantAndTrack(video3,15,0.5,10)
